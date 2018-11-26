@@ -102,7 +102,7 @@ class SectionsStudentsTable extends Table
 
         //$this->upDateStudentYearGPA();
 
-        //todo - refactor to work with a single entity and update only the affected student
+
         //update the gpa information for this student
         $id = $sectionsstudent->studentid;
 
@@ -118,7 +118,7 @@ class SectionsStudentsTable extends Table
 
         //$this->upDateStudentYearGPA();
 
-        //todo - refactor to work with a single entity and update only the affected student
+       
         //update the gpa and credit information for this student
         $id = $sectionsstudent->studentid;
 
