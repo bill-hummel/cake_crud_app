@@ -103,8 +103,8 @@ class SectionsStudentsController extends AppController
                         $course = $this->Sections->Classes->get($section->classid);
                         $courseName = $course->coursename;
 
-                        $semestercur = $this->Sections->Semester->get($section->sectionid);
-                        $sem = $semestercur->semesterabr;
+                        $semestercur = $this->Sections->Semester->get($section->semesterid);
+                       $sem = $semestercur->semesterabr;
 
                         return "{$courseName} ($sectionNumber) ($sem)";
                         
@@ -173,7 +173,7 @@ class SectionsStudentsController extends AppController
         $sectionsStudent = $this->SectionsStudents->get($id);
         if ($this->SectionsStudents->delete($sectionsStudent)) {
 
-            //update student credits for semester and year
+             //update student credits for semester and year
             $this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
             $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
 
