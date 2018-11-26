@@ -107,7 +107,7 @@ class SectionsStudentsController extends AppController
                        $sem = $semestercur->semesterabr;
 
                         return "{$courseName} ($sectionNumber) ($sem)";
-                        
+
                     }
        ]);
 
