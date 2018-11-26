@@ -36,7 +36,9 @@
 
                 <td><?= h($sectionsStudent->section->class->coursename.' '.$sectionsStudent->section->sectionid.' '.$sectionsStudent->section->semester->semesterabr) ?></td>
 
-                <td><?= h($sectionsStudent->student->firstname.' '.$sectionsStudent->student->lastname) ?></td>
+
+                <td><?= $this->Html->link(__($sectionsStudent->student->firstname.' '.$sectionsStudent->student->lastname), ['controller' => 'Students', 'action' => 'view',
+                    $sectionsStudent->student->studentnumber]) ?></td>
                 <td><?= h($sectionsStudent->lettergrade) ?></td>
                 <td><?= $this->Number->format($sectionsStudent->numericgrade) ?></td>
                 <td class="actions">
