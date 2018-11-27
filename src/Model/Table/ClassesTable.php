@@ -76,10 +76,10 @@ class ClassesTable extends Table
         $this->Sections->Instructors->InstructorSemesterClassCount();
 
         //students
-        $this->SectionsStudents->updateSingleStudentYearGPA();
-        $this->SectionsStudents->updateSingleStudentSemesterGPA();
-        $this->SectionsStudents->upDateStudentSemesterCredits();
-        $this->SectionsStudents->upDateStudentYearCredits();
+        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
+        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
+        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
+        $this->Sections->SectionsStudents->upDateStudentYearCredits();
     }
 
 }

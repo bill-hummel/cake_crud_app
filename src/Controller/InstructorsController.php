@@ -17,6 +17,7 @@ class InstructorsController extends AppController
         $this->loadComponent('Flash'); // Include the FlashComponent
 
         $this->loadModel('Instructors');
+        $this->loadModel('Sections');
         $this->loadModel('SectionsStudents');
 
 
@@ -96,6 +97,26 @@ class InstructorsController extends AppController
 
         
         if ($this->Instructors->delete($instructor)) {
+
+            //make the instructor value null in the section table
+
+            //get all sections with this instructors id
+            $instructorSections= $this->Sections->find()->where(['instructorid'=>$id]);
+
+            //update each section instructor id to a null value
+            foreach($instructorSections as $instructorSection)
+            {
+                $this->Sections->patchEntity( $instructorSection, ['instructorid'=>null]);
+                if ($this->Instructors->save($section)) {
+                    //$this->Flash->success(__('Section information has been updated.'));
+                   // return $this->redirect(['action' => 'index']);
+                }
+                //$this->Flash->error(__('Unable to update section information.'));
+
+
+            }
+
+
             $this->Flash->success(__('The {0} instructor has been deleted.', $instructor->id));
             return $this->redirect(['action' => 'index']);
         }
