@@ -72,8 +72,8 @@ class ClassesTable extends Table
         //todo - fix this : generates a not included error in Cake
         //update counts for instructors and counts and gpa for students
         //instructors
-        $this->Instructors->InstructorTotalClassCount();
-        $this->Instructors->InstructorSemesterClassCount();
+        $this->Sections->Instructors->InstructorTotalClassCount();
+        $this->Sections->Instructors->InstructorSemesterClassCount();
 
         //students
         $this->SectionsStudents->updateSingleStudentYearGPA();
