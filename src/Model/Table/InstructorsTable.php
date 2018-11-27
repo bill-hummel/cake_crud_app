@@ -45,13 +45,12 @@ class InstructorsTable extends Table
 
     public function afterDeleteCommit()
     {
-        //todo - fix this : generates a not included error in Cake
         //update student information
         //students
-        $this->SectionsStudents->updateSingleStudentYearGPA();
-        $this->SectionsStudents->updateSingleStudentSemesterGPA();
-        $this->SectionsStudents->upDateStudentSemesterCredits();
-        $this->SectionsStudents->upDateStudentYearCredits();
+        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
+        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
+        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
+        $this->Sections->SectionsStudents->upDateStudentYearCredits();
 
 
     }
@@ -63,9 +62,9 @@ class InstructorsTable extends Table
     {
         if($id) {
             $totalClassCount = $this->Sections->find('all',
-                ['conditons' => ['$this->id' => $id]])
+                ['conditions' => ['instructorid' => $id]])
                 ->select([
-                    'id' => 'instructors.id',
+                    'instructorid' => 'instructors.id',
                     'total' => 'COUNT(*)'
 
                 ])
@@ -77,7 +76,7 @@ class InstructorsTable extends Table
             //update all
             $totalClassCount = $this->Sections->find()
                 ->select([
-                    'id' => 'instructors.id',
+                    'instructorid' => 'instructors.id',
                     'total' => 'COUNT(*)'
 
                 ])
@@ -92,7 +91,7 @@ class InstructorsTable extends Table
 
             $query =  $this->query();
             $query->update()->set(['totalclasses' => $classcount->total])
-                ->where(['id'=>$classcount->id])
+                ->where(['id'=>$classcount->instructorid])
                 ->execute();
 
         }
@@ -106,9 +105,9 @@ class InstructorsTable extends Table
     {
         if($id) {
             $semesterClassCount = $this->Sections->find('all',
-                ['conditons' => ['$this->id' => $id]])//todo - fix this
+                ['conditions' => ['instructorid' => $id]])
             ->select([
-                'id' => 'instructors.id',
+                'instructorid' => 'instructors.id',
                 'total' => 'COUNT(*)'
 
             ])
@@ -122,7 +121,7 @@ class InstructorsTable extends Table
             //update all
             $semesterClassCount = $this->Sections->find()
             ->select([
-                'id' => 'instructors.id',
+                'instructorid' => 'instructors.id',
                 'total' => 'COUNT(*)'
 
             ])
@@ -139,7 +138,7 @@ class InstructorsTable extends Table
 
             $query =  $this->query();
             $query->update()->set(['semesterclasses' => $semclasscount->total])
-                ->where(['id'=>$semclasscount->id])
+                ->where(['id'=>$semclasscount->instructorid])
                 ->execute();
 
         }

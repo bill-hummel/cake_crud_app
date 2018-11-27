@@ -40,6 +40,12 @@ class SectionsTable extends Table
 
         ]);
 
+        //semesters belong to many sectionsStudents
+        $this->hasMany('SectionsStudents', [
+            'foreignKey' => 'sectionid'
+
+        ]);
+
         //sections have many students within them (sections_students)
         //semesters belong to many sections (belongsToMany ??)
         $this->belongsToMany('Students', [
@@ -176,6 +182,13 @@ class SectionsTable extends Table
         //update instructor class count for the instructor id
         $this->Instructors->InstructorTotalClassCount($section->instructorid);
         $this->Instructors->InstructorSemesterClassCount($section->instructorid);
+
+
+        //update student information
+        $this->SectionsStudents->updateSingleStudentYearGPA();
+        $this->SectionsStudents->updateSingleStudentSemesterGPA();
+        $this->SectionsStudents->upDateStudentSemesterCredits();
+        $this->SectionsStudents->upDateStudentYearCredits();
 
 
 
