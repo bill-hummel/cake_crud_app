@@ -8,7 +8,7 @@
     <ul class="side-nav">
         <li class="heading"><?= __('Actions') ?></li>
         <li><?= $this->Html->link(__('List Sections'), ['controller' => 'Sections', 'action' => 'index']) ?> </li>
-        <li><?= $this->Html->link(__('New Student'), ['controller' => 'Sections', 'action' => 'add']) ?> </li>
+        <li><?= $this->Html->link(__('New Section'), ['controller' => 'Sections', 'action' => 'add']) ?> </li>
     </ul>
 </nav>
 <div class="sections form large-9 medium-8 columns content">
@@ -16,16 +16,16 @@
     <fieldset>
         <legend><?= __('Edit Section') ?></legend>
         <?php
-             echo $this->Form->control('year');
-        echo $this->Form->control('semesterid', ['type'=>'select','options' => $semester]);
-        echo $this->Form->control('meetingdays');
-        echo $this->Form->control('starttime');
-        echo $this->Form->control('endtime');
-        echo $this->Form->control('totalstudents');
-        echo $this->Form->control('sectionid');
+             echo $this->Form->control('year',['label'=>'Year','disabled'=>'true']);
+        echo $this->Form->control('semesterid', ['type'=>'select','options' => $semester,'label'=>'Semester','disabled'=>'true']);
+        echo $this->Form->control('meetingdays',['label'=>'Meeting Days','disabled'=>'true']);
+        echo $this->Form->control('starttime',['label'=>'Start Time','disabled'=>'true']);
+        echo $this->Form->control('endtime',['label'=>'End Time','disabled'=>'true']);
+        echo $this->Form->control('totalstudents',['label'=>'Max Class Size','disabled'=>'true']);
+        echo $this->Form->control('sectionid',['label'=>'Section','disabled'=>'true']);
         //echo $this->Form->control('classid');
-        echo $this->Form->control('instructorid', ['type'=>'select','options' => $instructors]);
-        echo $this->Form->control('classid', ['type'=>'select','options' => $classes]);
+        echo $this->Form->control('Instructor', ['type'=>'select','options' => $instructors]);
+        echo $this->Form->control('Course Name', ['type'=>'select','options' => $classes,'disabled'=>'true']);
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>
