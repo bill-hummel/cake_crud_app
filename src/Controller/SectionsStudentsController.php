@@ -81,7 +81,7 @@ class SectionsStudentsController extends AppController
 
             if ($this->SectionsStudents->save($sectionsStudent)) {
 
-                //update student credits for semester and year
+                //todo - move these to a callback: update student credits for semester and year
                 $this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
                 $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
 
@@ -173,7 +173,7 @@ class SectionsStudentsController extends AppController
         $sectionsStudent = $this->SectionsStudents->get($id);
         if ($this->SectionsStudents->delete($sectionsStudent)) {
 
-             //update student credits for semester and year
+             //todo - move these to  callback: update student credits for semester and year
             $this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
             $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
 

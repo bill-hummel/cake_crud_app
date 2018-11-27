@@ -156,7 +156,7 @@ class SectionsTable extends Table
         //$this->Instructors->InstructorTotalClassCount($section->instructorid);
         //$this->Instructors->InstructorSemesterClassCount($section->instructorid);
 
-        //todo - complete implementation oc this update method to replace the above method.
+        //todo - complete implementation of this update method to replace the above method.
 //        $id = $section->instructorid;
 //        //update the number of courses for semester and year for current instructor
 //             //update letter grade
