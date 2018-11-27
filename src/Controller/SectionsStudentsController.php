@@ -106,7 +106,7 @@ class SectionsStudentsController extends AppController
                         $semestercur = $this->Sections->Semester->get($section->semesterid);
                        $sem = $semestercur->semesterabr;
 
-                        return "{$courseName} ($sectionNumber) ($sem)";
+                        return "{$courseName} ($sectionNumber) ($sem) ".$section->starttime." - ".$section->endtime;
 
                     }
        ]);
