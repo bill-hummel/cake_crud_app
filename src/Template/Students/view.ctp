@@ -71,7 +71,7 @@
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['controller' => 'SectionsStudents', 'action' => 'view', $section->_joinData->id]) ?>
                     <?= $this->Html->link(__('Edit Grade'), ['controller' => 'SectionsStudents', 'action' => 'edit', $section->_joinData->id]) ?>
-                    <?= $this->Form->postLink(__('Delete'), ['controller' => 'Students', 'action' => 'delete', $student->studentnumber], ['confirm' => __('Are you sure you want to delete # {0}?', $student->studentnumber)]) ?>
+                    <?= $this->Form->postLink(__('Delete'), ['controller' => 'SectionsStudents', 'action' => 'delete', $section->_joinData->id], ['confirm' => __('Are you sure you want to delete # {0}?', $student->studentnumber)]) ?>
                 </td>
             </tr>
             <?php endforeach; ?>

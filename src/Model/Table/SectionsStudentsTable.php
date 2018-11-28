@@ -121,7 +121,6 @@ class SectionsStudentsTable extends Table
        
         //update the gpa and credit information for this student
         $id = $sectionsstudent->studentid;
-
         $this->updateSingleStudentYearGPA($id);
         $this->updateSingleStudentSemesterGPA($id);
         $this->upDateStudentSemesterCredits($id);
@@ -237,6 +236,7 @@ class SectionsStudentsTable extends Table
                 ->innerjoin('sections_students', 'Students.id = sections_students.studentid')
                 ->where(['sections_students.lettergrade IS NOT' => 'I'])
                 ->group('Students.id');
+
         }
         else{
             $studentsYearGpa = $this->Students->find()
