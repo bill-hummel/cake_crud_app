@@ -105,6 +105,7 @@ class SectionsController extends AppController
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
             $section = $this->Sections->patchEntity($section, $this->request->getData());
+
             if ($this->Sections->save($section)) {
                 $this->Flash->success(__('The section has been saved.'));
 

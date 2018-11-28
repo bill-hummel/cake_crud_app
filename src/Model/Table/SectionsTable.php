@@ -177,18 +177,23 @@ class SectionsTable extends Table
 
     }
 
-    public function afterDelete($event,$section,$options)
+    public function afterDeleteCommit($event,$section,$options)
     {
+
+//        //Delete all section_student records - automatic via join table belongsToMany relationship
+
+
+
         //update instructor class count for the instructor id
-        $this->Instructors->InstructorTotalClassCount($section->instructorid);
-        $this->Instructors->InstructorSemesterClassCount($section->instructorid);
-
-
-        //update student information
-        $this->SectionsStudents->updateSingleStudentYearGPA();
-        $this->SectionsStudents->updateSingleStudentSemesterGPA();
-        $this->SectionsStudents->upDateStudentSemesterCredits();
-        $this->SectionsStudents->upDateStudentYearCredits();
+//        $this->Instructors->InstructorTotalClassCount($section->instructorid);
+//        $this->Instructors->InstructorSemesterClassCount($section->instructorid);
+//
+//
+//        //update student information
+//        $this->SectionsStudents->updateSingleStudentYearGPA();
+//        $this->SectionsStudents->updateSingleStudentSemesterGPA();
+//        $this->SectionsStudents->upDateStudentSemesterCredits();
+//        $this->SectionsStudents->upDateStudentYearCredits();
 
 
 

@@ -82,8 +82,8 @@ class SectionsStudentsController extends AppController
             if ($this->SectionsStudents->save($sectionsStudent)) {
 
                 //todo - move these to a callback: update student credits for semester and year
-                $this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
-                $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
+                //$this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
+               // $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
 
                 $this->Flash->success(__('The sections student has been saved.'));
 
@@ -174,8 +174,8 @@ class SectionsStudentsController extends AppController
         if ($this->SectionsStudents->delete($sectionsStudent)) {
 
              //todo - move these to  callback: update student credits for semester and year
-            $this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
-            $this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
+            //$this->SectionsStudents->upDateStudentYearCredits($sectionsStudent->studentid);
+            //$this->SectionsStudents->upDateStudentSemesterCredits($sectionsStudent->studentid);
 
             $this->Flash->success(__('The sections student has been deleted.'));
         } else {

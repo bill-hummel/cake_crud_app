@@ -106,12 +106,15 @@ class InstructorsController extends AppController
             //update each section instructor id to a null value
             foreach($instructorSections as $instructorSection)
             {
-                $this->Sections->patchEntity( $instructorSection, ['instructorid'=>null]);
-                if ($this->Instructors->save($section)) {
-                    //$this->Flash->success(__('Section information has been updated.'));
-                   // return $this->redirect(['action' => 'index']);
+                $sectionInstructorNull =$this->Sections->patchEntity( $instructorSection, ['instructorid'=>null]);
+
+                //todo - save is still not working
+                if (!($this->Sections->save($sectionInstructorNull))) {
+
+                    $this->Flash->error(__('Unable to update instructor information.'));
+
                 }
-                //$this->Flash->error(__('Unable to update section information.'));
+
 
 
             }

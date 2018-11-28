@@ -20,7 +20,7 @@ class StudentsTable extends Table
         $this->setPrimaryKey('id');
 
         //students are assigned to many sections (sections_students)
-        //semesters belong to many sections (belongsToMany ??)
+
         $this->belongsToMany('Sections', [
         'targetForeignKey' => 'sectionid',
         'foreignKey'=>'studentid',
@@ -54,6 +54,8 @@ class StudentsTable extends Table
         $rules->add($rules->isUnique(['studentnumber']));
         return $rules;
     }
+
+
 
 
 }

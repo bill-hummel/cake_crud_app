@@ -14,7 +14,7 @@
 <div class="sections form large-9 medium-8 columns content">
     <?= $this->Form->create($section) ?>
     <fieldset>
-        <legend><?= __('Edit Section') ?></legend>
+        <legend><?= __('Edit Section '.$section->sectionid.' of class '.$section->class->coursename) ?></legend>
         <?php
              echo $this->Form->control('year',['label'=>'Year','disabled'=>'true']);
         echo $this->Form->control('semesterid', ['type'=>'select','options' => $semester,'label'=>'Semester','disabled'=>'true']);
@@ -22,10 +22,8 @@
         echo $this->Form->control('starttime',['label'=>'Start Time','disabled'=>'true']);
         echo $this->Form->control('endtime',['label'=>'End Time','disabled'=>'true']);
         echo $this->Form->control('totalstudents',['label'=>'Max Class Size','disabled'=>'true']);
-        echo $this->Form->control('sectionid',['label'=>'Section','disabled'=>'true']);
-        //echo $this->Form->control('classid');
-        echo $this->Form->control('Instructor', ['type'=>'select','options' => $instructors]);
-        echo $this->Form->control('Course Name', ['type'=>'select','options' => $classes,'disabled'=>'true']);
+        echo $this->Form->control('instructorid', ['type'=>'select','label'=>'Instructor','options' => $instructors]);
+
         ?>
     </fieldset>
     <?= $this->Form->button(__('Submit')) ?>

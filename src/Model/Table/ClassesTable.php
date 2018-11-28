@@ -67,19 +67,69 @@ class ClassesTable extends Table
     }
 
 
-    public function afterDeleteCommit( $event,  $entity,  $options)
+    public function afterDeleteCommit( $event,  $classes,  $options)
     {
-        //todo - fix this : generates a not included error in Cake
+         //Delete all section records withe this course and all section_students records with any sections of the course
+         //get the id of the course that is being deleted
+        $deletedCourseID = $classes->id;
+
+        //find all section records with that course id
+        $deletedCourseRelatedSections = $this->Sections->find()->where(['classid'=>$deletedCourseID])->all();
+
+
+        //delete all section_students with these course ids
+        //itertate through the list of sections for the given course
+        foreach($deletedCourseRelatedSections as $relatedSection)
+        {
+            //get the id of each individual section for the course to be deleted
+            $relatedSectionID = $relatedSection->id;
+
+            //find and delete section students - note need to acces sections_students through students
+            $sectionsStudentRelatedRecord = $this->Sections->SectionsStudents->find()->where(['sectionid'=> $relatedSectionID])->all();
+
+            //delete all records for sections_students with the related section id
+            foreach($sectionsStudentRelatedRecord as $relatedSectionStudent)
+            {
+                //delete section_student records with matching section ids
+               if( !($this->Sections->SectionsStudents->delete($relatedSectionStudent))){
+
+                        $this->Flash->error(__('The sections student could not be deleted. Please, try again.'));
+
+
+                }
+            }
+
+            //delete the section after deleting all section_student records for the section
+            if( !($this->Sections->delete($relatedSection))){
+
+                $this->Flash->error(__('The sections student could not be deleted. Please, try again.'));
+
+
+            }
+        }
+
+        //dump($deletedCourseRelatedSections);
+
+
+
+
+
+
+        //update all instructor and student records to reflect deleted sections and deleted section_student records
+
+
+
+
         //update counts for instructors and counts and gpa for students
         //instructors
-        $this->Sections->Instructors->InstructorTotalClassCount();
-        $this->Sections->Instructors->InstructorSemesterClassCount();
-
-        //students
-        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
-        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
-        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
-        $this->Sections->SectionsStudents->upDateStudentYearCredits();
+//        $this->Sections->Instructors->InstructorTotalClassCount();
+//        $this->Sections->Instructors->InstructorSemesterClassCount();
+//
+//        //students
+//        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
+//        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
+//        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
+//        $this->Sections->SectionsStudents->upDateStudentYearCredits();
     }
 
 }

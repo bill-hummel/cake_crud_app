@@ -98,42 +98,115 @@ class SectionsStudentsTable extends Table
 
     public function afterSaveCommit($event,$sectionsstudent,$options)
     {
-        //$this->upDateAllStudentCredits();
+        //update the credit and gpa information for this student
+        //get the data commited to the sections_students table
+        $studentid = $sectionsstudent->studentid;
+        $sectionid = $sectionsstudent->sectionid;
 
-        //$this->upDateStudentYearGPA();
 
 
-        //update the gpa information for this student
-        $id = $sectionsstudent->studentid;
+        //get the value of a credit for this course
+        $thisSection = $this->sections->find()->where(['id'=>$sectionid])->firstOrFail();
+        $thisClass =  $this->sections->classes->find()->where(['id'=>$thisSection->classid])->firstOrFail();
+        $thisClassCreditValue = $thisClass->credits;
 
-        $this->updateSingleStudentYearGPA($id);
-        $this->updateSingleStudentSemesterGPA($id);
+        //get the current student
+        $thisStudent =  $this->Students->find()->where(['id'=>$studentid])->firstOrFail();
+
+        //Check that this afterSaveCommit is not being called on a grade change, but on a course add for the student!
+        if(! $sectionsstudent->lettergrade) {
+            //do the year and semester credit updates
+
+            //update credit sums
+            $creditYearTotal = $thisStudent->totalcredits + $thisClassCreditValue;
+
+            //add this value to the current student's total credits and current semester credits
+            $currentStudent = $this->Students->patchEntity($thisStudent, ['totalcredits' => $creditYearTotal]);
+
+            //optionally update the semester totals
+            if ($this->sections->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
+                $creditSemesterTotal = $thisStudent->semestercredits + $thisClassCreditValue;
+
+                //add this value to the current student's total credits and current semester credits
+                $currentStudent = $this->Students->patchEntity($thisStudent, ['semestercredits' => $creditSemesterTotal]);
+
+            }
+
+
+            //write out data to the students table
+            if (!($this->Students->save($currentStudent))) {
+
+                $this->Flash->error(__('Unable to update instructor information.'));
+
+            }
+
+        }
+        else{
+            //todo -> upgrade to use weighted averages
+            //Update gpa values for year and semester
+
+            //get all courses for this student
+            $currentStudentClasses = $this->find()
+                ->contain(['Sections'=>['Semester']])
+                ->where(['SectionsStudents.studentid' => $studentid])->all();
+
+
+            //iterate over the sections and compute the gpa
+            $rowCount = 0;
+            $sumOfGrades = 0;
+dump($currentStudentClasses);
+            foreach( $currentStudentClasses as $currentClass)
+            {
+                //count the values
+                $rowCount++;
+
+                //compute the sum
+                $sumOfGrades += $currentClass->numericgrade;
+
+            }
+
+            //compute gpa
+            $yearGpa = $sumOfGrades/$rowCount;
+        }
+        dump($yearGpa, $sumOfGrades, $rowCount);
+
+
+
+
+        //$this->updateSingleStudentYearGPA($id);
+        //$this->updateSingleStudentSemesterGPA($id);
 
 
     }
 
-    public function afterDelete($event,$sectionsstudent,$options)
+    public function afterDeleteCommit($event,$sectionsstudent,$options)
     {
-        //$this->upDateAllStudentCredits();
 
-        //$this->upDateStudentYearGPA();
 
        
         //update the gpa and credit information for this student
         $id = $sectionsstudent->studentid;
 
-        $this->updateSingleStudentYearGPA($id);
-        $this->updateSingleStudentSemesterGPA($id);
-        $this->upDateStudentSemesterCredits($id);
-        $this->upDateStudentYearCredits($id);
+//        $this->updateSingleStudentYearGPA($id);
+//        $this->updateSingleStudentSemesterGPA($id);
+//        $this->upDateStudentSemesterCredits($id);
+//        $this->upDateStudentYearCredits($id);
 
 
 
     }
 
+
+
+
+   //--------------------old functions to eliminate-----------------------
+//
+//
+
+
     public function upDateStudentSemesterCredits($id=null)
     {
-
+        //do a global update on semester change
         if($id) {
             $SemesterStudentCredits = $this->find('all',
                 ['conditons' => ['$this->Students.id' => $id]])
@@ -182,6 +255,7 @@ class SectionsStudentsTable extends Table
 
     public function upDateStudentYearCredits($id=null)
     {
+        //do a global update on semester change
         if($id) {
             $allStudentCredits = $this->find('all',
                 ['conditons' => ['$this->Students.id' => $id]])
