@@ -85,7 +85,7 @@ class SectionsStudentsTable extends Table
 
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->isUnique(['studentid','sectionid']));
+        $rules->add($rules->isUnique(['studentid', 'sectionid']));
         return $rules;
     }
 
@@ -96,26 +96,142 @@ class SectionsStudentsTable extends Table
      */
 
 
-    public function afterSaveCommit($event,$sectionsstudent,$options)
+    public function afterSaveCommit($event, $sectionsstudent, $options)
     {
         //update the credit and gpa information for this student
         //get the data commited to the sections_students table
         $studentid = $sectionsstudent->studentid;
         $sectionid = $sectionsstudent->sectionid;
+        $letterGradeFlag = $sectionsstudent->lettergrade; //was a letter grade or a course add submitted?
+        $modeFlag = 1;   //modeflag = 1 ---> ad a course,   modeFlag = 0 ---> delete a course
+
+
+        //Check that this afterSaveCommit is not being called on a grade change, but on a course add for the student!
+        if (!$letterGradeFlag) {
+            //do the year and semester credit updates
+            $this->computeStudentCredits ($studentid, $sectionid,$modeFlag);
+
+
+        } else {
+            //A grade was changed - update the student's gpa values for semeter and year
+            $this->computeStudentGpas($studentid , $sectionid );
+
+        }
 
 
 
+        //$this->updateSingleStudentYearGPA($id);
+        //$this->updateSingleStudentSemesterGPA($id);
+
+
+    }
+
+    public function afterDeleteCommit($event, $sectionsstudent, $options)
+    {
+        //update student credits on deltetion from a sectionm
+
+        //get the data commited to the sections_students table
+        $studentid = $sectionsstudent->studentid;
+        $sectionid = $sectionsstudent->sectionid;
+        $modeFlag = 2;   //modeflag = 1 ---> ad a course,   modeFlag = 0 ---> delete a course
+
+        //update the
+        $this->computeStudentCredits ($studentid, $sectionid, $modeFlag);
+
+
+        //A grade was changed - update the student's gpa values for semeter and year
+        $this->computeStudentGpas($studentid , $sectionid );
+
+
+
+    }
+
+    //----------------------- support methods for updating student credits and gpa values ----------------------//
+
+    //compute student gpa for semester and year and write out
+    public function computeStudentGpas($studentid = null, $sectionid = null)
+    {
+        //todo -> upgrade to use weighted averages
+        //Update gpa values for year and semester
+
+        //get all courses and semester courses for this student
+        $currentStudentYearClasses = $this->find()
+            ->contain(['Sections' => ['Semester']])
+            ->where(['SectionsStudents.studentid' => $studentid])->all();
+
+        //count only courses for this semester
+        $currentStudentSemesterClasses = $this->find()
+            ->contain(['Sections' => ['Semester']])
+            ->where(['SectionsStudents.studentid' => $studentid, 'Semester.semestercurrent' => '1'])
+            ->all();
+
+
+        //iterate over the sections and compute the gpa
+        $rowCountYear = 0;
+        $rowCountSemester = 0;
+        $sumOfGradesYear = 0;
+        $sumOfGradesSemester = 0;
+        $yearGpa = 0;
+        $semesterGpa=0;
+
+        //year grades sum and count
+        foreach ($currentStudentYearClasses as $currentClass) {
+            //count the values and sum for all courses
+            $rowCountYear++;
+            $sumOfGradesYear += $currentClass->numericgrade;
+        }
+
+        //compute gpa for current year
+        if($rowCountYear != 0){
+            $yearGpa = $sumOfGradesYear / $rowCountYear;
+        }
+
+        //semester grades sum and count
+        foreach ($currentStudentSemesterClasses as $currentSemClass) {
+            //count the values and sum for all courses
+            $rowCountSemester++;
+            $sumOfGradesSemester += $currentSemClass->numericgrade;
+        }
+
+        //compute gpa for current semester
+        if($rowCountSemester != 0){
+            $semesterGpa = $sumOfGradesSemester / $rowCountSemester;
+        }
+
+
+
+
+
+
+        //write gpa changes to the students table for the student
+
+        //get the current student
+        $thisStudent = $this->Students->find()->where(['id' => $studentid])->firstOrFail();
+
+        $currentStudent = $this->Students->patchEntity($thisStudent, ['semestergpa' => $semesterGpa, 'gpa'=>$yearGpa]);
+
+        if (!($this->Students->save($currentStudent))) {
+
+            $this->Flash->error(__('Unable to update student GPA information.'));
+
+        }
+
+    }
+
+    //update student year and semester credits
+    public function computeStudentCredits ($studentid = null, $sectionid = null, $modeFlag=1)
+    {
         //get the value of a credit for this course
-        $thisSection = $this->sections->find()->where(['id'=>$sectionid])->firstOrFail();
-        $thisClass =  $this->sections->classes->find()->where(['id'=>$thisSection->classid])->firstOrFail();
+        $thisSection = $this->sections->find()->where(['id' => $sectionid])->firstOrFail();
+        $thisClass = $this->sections->classes->find()->where(['id' => $thisSection->classid])->firstOrFail();
         $thisClassCreditValue = $thisClass->credits;
 
         //get the current student
-        $thisStudent =  $this->Students->find()->where(['id'=>$studentid])->firstOrFail();
+        $thisStudent = $this->Students->find()->where(['id' => $studentid])->firstOrFail();
 
-        //Check that this afterSaveCommit is not being called on a grade change, but on a course add for the student!
-        if(! $sectionsstudent->lettergrade) {
-            //do the year and semester credit updates
+
+        if($modeFlag == 1) {
+            //adding student credits ($modeFlag = 1)
 
             //update credit sums
             $creditYearTotal = $thisStudent->totalcredits + $thisClassCreditValue;
@@ -141,62 +257,36 @@ class SectionsStudentsTable extends Table
             }
 
         }
+
         else{
-            //todo -> upgrade to use weighted averages
-            //Update gpa values for year and semester
+            //deleting credits - (modeFlag = 2)
 
-            //get all courses for this student
-            $currentStudentClasses = $this->find()
-                ->contain(['Sections'=>['Semester']])
-                ->where(['SectionsStudents.studentid' => $studentid])->all();
+            //update credit sums be subtracting the deleted courses's credit value
+            $creditYearTotal = $thisStudent->totalcredits - $thisClassCreditValue;
 
+            //subtract this value from the current student's total credits and current semester credits
+            $currentStudent = $this->Students->patchEntity($thisStudent, ['totalcredits' => $creditYearTotal]);
 
-            //iterate over the sections and compute the gpa
-            $rowCount = 0;
-            $sumOfGrades = 0;
-dump($currentStudentClasses);
-            foreach( $currentStudentClasses as $currentClass)
-            {
-                //count the values
-                $rowCount++;
+            //optionally update the semester total by deleting value of removed course's credits
+            if ($this->sections->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
+                $creditSemesterTotal = $thisStudent->semestercredits - $thisClassCreditValue;
 
-                //compute the sum
-                $sumOfGrades += $currentClass->numericgrade;
+                //add this value to the current student's total credits and current semester credits
+                $currentStudent = $this->Students->patchEntity($thisStudent, ['semestercredits' => $creditSemesterTotal]);
+            }
+
+            //write out data to the students table
+            if (!($this->Students->save($currentStudent))) {
+
+                $this->Flash->error(__('Unable to update instructor information.'));
 
             }
 
-            //compute gpa
-            $yearGpa = $sumOfGrades/$rowCount;
+
+
         }
-        dump($yearGpa, $sumOfGrades, $rowCount);
-
-
-
-
-        //$this->updateSingleStudentYearGPA($id);
-        //$this->updateSingleStudentSemesterGPA($id);
-
 
     }
-
-    public function afterDeleteCommit($event,$sectionsstudent,$options)
-    {
-
-
-       
-        //update the gpa and credit information for this student
-        $id = $sectionsstudent->studentid;
-
-//        $this->updateSingleStudentYearGPA($id);
-//        $this->updateSingleStudentSemesterGPA($id);
-//        $this->upDateStudentSemesterCredits($id);
-//        $this->upDateStudentYearCredits($id);
-
-
-
-    }
-
-
 
 
    //--------------------old functions to eliminate-----------------------
