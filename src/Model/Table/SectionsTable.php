@@ -42,25 +42,22 @@ class SectionsTable extends Table
 
         //semesters belong to many sectionsStudents
         $this->hasMany('SectionsStudents', [
-            'foreignKey' => 'sectionid'
+            'foreignKey' => 'sectionid',
+
 
         ]);
 
         //sections have many students within them (sections_students)
-        //semesters belong to many sections (belongsToMany ??)
+        //semesters belong to many sections
         $this->belongsToMany('Students', [
             'targetForeignKey' => 'studentid',
             'foreignKey'=>'sectionid',
-            'joinTable' => 'sections_students'
+            'joinTable' => 'sections_students',
+
         ]);
-        //s
 
 
-        //sections have many classes ??
 
-        //'joinTable' => 'sections_students'
-
-        //
     }
 
     /**
@@ -134,70 +131,151 @@ class SectionsTable extends Table
     public function beforeSave($event,$section,$options)
     {
         //todo - incremental changes to instructors and former instructors
-        //check for instructor change... update instructor class totals if there is  a change
-        //$sectionBeforeUpdate = $this->get($section->id);
+        //check for instructor change... update instructor class totals for original instructor IF NOT NULL
+        $sectionID = $section->id;
+        $newInstructorID = $section->instructorid;
 
-        //decrement classes count
-       // $oldInstructor = $this->Instructors->get($sectionBeforeUpdate->instructorid);
+        //get the original instructor's information from the database before updating
 
-      //  $total = $oldInstructor->totalclasses - 1;
+        if($sectionBeforeUpdate = $this->find()->where(['Sections.id' => $sectionID])->first()) {
+            //check to be sure that the instructor was not deleted and made null
+            if ($sectionBeforeUpdate->instructorid != null && $newInstructorID != $sectionBeforeUpdate->instructorid) {
 
-        //update old instructor class counts
-        //update instructors table
-//        $query =  $this->Instructors->query();
-//        $query->update()->set(['totalclasses' => $total])
-//            ->where(['id'=>$sectionBeforeUpdate->instructorid])
-//            ->execute();
+                //decrement classes count
+                $thisInstructor = $this->Instructors->get($sectionBeforeUpdate->instructorid);
+
+                $thisInstructorYearTotal = $thisInstructor->totalclasses - 1;
 
 
+                //update instructors table for the year and semester
+                $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses' => $thisInstructorYearTotal]);
+
+                //optionally update the semester totals
+                if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionID, 'Semester.semestercurrent' => '1'])->first()) {
+                    $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
+
+                    //add this value to the current student's total credits and current semester credits
+                    $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+
+                }
+
+                //save to the instructors table
+                if (!($this->Instructors->save($oldInstructor))) {
+
+                    $this->Flash->error(__('Unable to update instructor course totals information.'));
+
+                }
+            }
+        }
 
     }
 
 
     public function afterSaveCommit($event,$section,$options)
     {
-        //update instructor class count for the instructor id via datbase methods
-        $this->Instructors->InstructorTotalClassCount();
-        $this->Instructors->InstructorSemesterClassCount();
-        //$this->Instructors->InstructorTotalClassCount($section->instructorid);
-        //$this->Instructors->InstructorSemesterClassCount($section->instructorid);
 
-        //todo - complete implementation of this update method to replace the above method.
-//        $id = $section->instructorid;
-//        //update the number of courses for semester and year for current instructor
-//             //update letter grade
-//             $currentInstructor = $this->Instructors->get($id);
-//
-//             $total = $currentInstructor->totalclasses + 1;
-//
-//             //update instructors table
+        //if instructor changes then change course information for prior instructor in beforeSave, new instructor here
+        // as an add
 
-        // }
 
+        //--------------------------------- Update the Instructor Course Totals for the selected Instructor ----------------//
+        //Get the id of the current instructor
+        $id = $section->instructorid;
+        $sectionid = $section->id;
+
+        //update the number of courses for semester and year for current instructor
+
+        $thisInstructor = $this->Instructors->get($id);
+
+        $thisInstructorYearTotal = $thisInstructor->totalclasses + 1;
+
+        //update instructors table for the year and semester
+        $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses'=>$thisInstructorYearTotal]);
+
+        //optionally update the semester totals
+        if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
+            $thisInstructorSemesterTotal = $thisInstructor->semesterclasses + 1;
+
+            //add this value to the current student's total credits and current semester credits
+            $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+
+        }
+
+        //save to the instructors table
+        if (!($this->Instructors->save($currentInstructor))) {
+
+            $this->Flash->error(__('Unable to update instructor course totals information.'));
+
+        }
 
     }
 
-    public function afterDeleteCommit($event,$section,$options)
+
+
+
+    public function beforeDelete($event,$section,$options)
     {
+        //update Instructor course totals
+        //Get the id of the current instructor
+        $id = $section->instructorid;
+        $sectionid = $section->id;
 
-//        //Delete all section_student records - automatic via join table belongsToMany relationship
+        //update the number of courses for semester and year for current instructor
+
+        $thisInstructor = $this->Instructors->get($id);
+
+        $thisInstructorYearTotal = $thisInstructor->totalclasses - 1;
+
+        //update instructors table for the year and semester
+        $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses'=>$thisInstructorYearTotal]);
+
+        //optionally update the semester totals
+        if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
+            $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
+
+            //add this value to the current student's total credits and current semester credits
+            $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+
+        }
+
+        //save to the instructors table
+        if (!($this->Instructors->save($currentInstructor))) {
+
+            $this->Flash->error(__('Unable to update instructor course totals information.'));
+
+        }
 
 
-
-        //update instructor class count for the instructor id
-//        $this->Instructors->InstructorTotalClassCount($section->instructorid);
-//        $this->Instructors->InstructorSemesterClassCount($section->instructorid);
-//
-//
-//        //update student information
-//        $this->SectionsStudents->updateSingleStudentYearGPA();
-//        $this->SectionsStudents->updateSingleStudentSemesterGPA();
-//        $this->SectionsStudents->upDateStudentSemesterCredits();
-//        $this->SectionsStudents->upDateStudentYearCredits();
+        //Delete all section_student records - automatic via join table belongsToMany relationship
+        //update student credits on deletion from a section
 
 
+        //get the data commited to the sections_students table
+
+        $sectionid = $section->id;
+        $modeFlag = 2;   //modeflag = 1 ---> ad a course,   modeFlag = 2 ---> delete a course
+
+        //get all student ids from sections before they are deleted from the join table
+        $currentSectionStudents = $this->SectionsStudents->find()
+            ->where(['SectionsStudents.sectionid' => $sectionid])
+            ->all();
+
+
+        //sequentially change the gpa and credit values for each student
+        foreach ($currentSectionStudents as $currentStudent) {
+            $currentStudentID = $currentStudent->studentid;
+
+            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, $modeFlag);
+
+
+            //A grade was changed - update the student's gpa values for semester and year
+            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, $modeFlag );
+
+
+        }
 
     }
+
 
 
 

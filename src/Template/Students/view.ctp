@@ -67,7 +67,14 @@
                 <td><?= h($section->starttime.' - '.$section->endtime) ?></td>
                 <td><?= h($section->sectionid) ?></td>
                 <td><?= h($section->class->coursename) ?></td>
-                <td><?= h($section->instructor->lastname) ?></td>
+                <td><?php if($section->instructor==null){
+                               echo 'No instructor';
+                          }
+                          else {
+                                echo h($section->instructor->lastname);
+                          }
+
+                    ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['controller' => 'SectionsStudents', 'action' => 'view', $section->_joinData->id]) ?>
                     <?= $this->Html->link(__('Edit Grade'), ['controller' => 'SectionsStudents', 'action' => 'edit', $section->_joinData->id]) ?>

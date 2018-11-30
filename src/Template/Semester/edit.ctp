@@ -16,8 +16,7 @@
     <fieldset>
         <legend><?= __('Edit Semester') ?></legend>
         <?php
-            echo $this->Form->control('semestername');
-            echo $this->Form->control('semesterabr');
+            echo h('Current Semester: '.$semester->semestername);
             echo $this->Form->control('semestercurrent');
         ?>
     </fieldset>

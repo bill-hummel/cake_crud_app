@@ -67,6 +67,97 @@ class ClassesTable extends Table
     }
 
 
+    public function beforeSaveCommit()
+    {
+        // todo - update all student records affected by a credit change
+        //get all sections , all students, update credit value by subtracting old credit value (db) and adding the new
+        // (as submitted)
+
+
+
+
+
+    }
+
+
+    public function beforeDelete($event,$class,$options)
+    {
+
+       //update student and Instructor records
+
+
+        //get the id for this class record
+        $classid = $class->id;
+
+        $modeFlag = 2;   //modeflag = 1 ---> ad a course,   modeFlag = 2 ---> delete a course
+
+        //Get the sections associated with this course
+        $currentClassSections = $this->Sections->find()
+            ->where(['Sections.classid' => $classid])
+            ->all();
+
+        //iterate through all sections assigned to this class
+        foreach($currentClassSections as $currentSection) {
+            $currentSectionID = $currentSection->id;
+
+            //-----------------------update instructors removed from sections associated with this class -------------//
+
+            //find the list of instructors (1 per section) for each section
+            $currentSectionInstructors = $this->Sections->find()
+                ->where(['Sections.id'=>$currentSectionID])
+                ->all();
+
+            //sequentially update the semester and year credits for each instructor affected
+            foreach ($currentSectionInstructors as $thisInstructor) {
+                //$thisInstructorID = $currentInstructor->id;
+
+                $thisInstructorYearTotal = $thisInstructor->totalclasses - 1;
+
+                //update instructors table for the year and semester
+                $currentInstructor = $this->Sections->Instructors->patchEntity($thisInstructor, ['totalclasses'=>$thisInstructorYearTotal]);
+
+                //optionally update the semester totals
+                if ($this->Sections->find()->contain(['Semester'])->where(['Sections.id' => $currentSectionID, 'Semester.semestercurrent' => '1'])->first()) {
+                    $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
+
+                    //add this value to the current student's total credits and current semester credits
+                    $currentInstructor = $this->Sections->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+
+                }
+
+                //save to the instructors table
+                if (!($this->Sections->Instructors->save($currentInstructor))) {
+
+                    $this->Flash->error(__('Unable to update instructor course totals information.'));
+
+                }
+
+            }
+
+
+
+            //-------------------------update students removed from sections associated with class ------------------//
+            //get all student ids from sections before they are deleted from the join table
+            $currentSectionStudents = $this->Sections->SectionsStudents->find()
+                ->where(['SectionsStudents.sectionid' => $currentSectionID])
+                ->all();
+
+
+            //sequentially change the gpa and credit values for each student
+            foreach ($currentSectionStudents as $currentStudent) {
+                $currentStudentID = $currentStudent->studentid;
+
+                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, $modeFlag);
+
+
+                //A grade was changed - update the student's gpa values for semeter and year
+                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $sectionid, $modeflag);
+
+
+            }
+        }
+    }
+
     public function afterDeleteCommit( $event,  $classes,  $options)
     {
          //Delete all section records withe this course and all section_students records with any sections of the course
@@ -108,28 +199,7 @@ class ClassesTable extends Table
             }
         }
 
-        //dump($deletedCourseRelatedSections);
 
-
-
-
-
-
-        //update all instructor and student records to reflect deleted sections and deleted section_student records
-
-
-
-
-        //update counts for instructors and counts and gpa for students
-        //instructors
-//        $this->Sections->Instructors->InstructorTotalClassCount();
-//        $this->Sections->Instructors->InstructorSemesterClassCount();
-//
-//        //students
-//        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
-//        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
-//        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
-//        $this->Sections->SectionsStudents->upDateStudentYearCredits();
     }
 
 }

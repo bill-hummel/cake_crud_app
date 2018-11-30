@@ -16,7 +16,7 @@ echo $this->Form->control('subject', ['label' => 'Subject or Department']);
 echo $this->Form->control('coursenumber', ['label' => 'Course Number']);
 echo $this->Form->control('coursename', ['label' => 'Course Name']);
 echo $this->Form->control('coursedescription', ['label' => 'Course Description', 'rows' => '3']);
-echo $this->Form->control('credits', ['label' => 'Credits']);
+echo $this->Form->control('credits', ['label' => 'Credits','disabled'=>'true']);
 
 //save button
 echo $this->Form->button(__('Save Course')); //submit back to current action

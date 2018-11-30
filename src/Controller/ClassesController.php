@@ -41,7 +41,9 @@ class ClassesController extends AppController
     public function view($coursenumber)
     {
         //use a dynamically built finder method to find class by number
-        $class = $this->Classes->find('classesByCoursenumber', ['coursenumber' => $coursenumber])->first();
+        $class = $this->Classes->find('classesByCoursenumber', ['coursenumber' => $coursenumber])
+            ->contain(['Sections' => ['Instructors','Semester']])
+            ->first();
 
 
         $this->set(compact('class'));

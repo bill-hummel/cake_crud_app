@@ -25,6 +25,7 @@ class InstructorsTable extends Table
         ]);
 
 
+
     }
 
     //validation
@@ -43,64 +44,9 @@ class InstructorsTable extends Table
         return $validator;
     }
 
-    public function afterDeleteCommit()
-    {
-        //update student information
-        //students
-        $this->Sections->SectionsStudents->updateSingleStudentYearGPA();
-        $this->Sections->SectionsStudents->updateSingleStudentSemesterGPA();
-        $this->Sections->SectionsStudents->upDateStudentSemesterCredits();
-        $this->Sections->SectionsStudents->upDateStudentYearCredits();
 
 
-    }
-
-
-
-
-    public function InstructorTotalClassCount($id=null)
-    {
-        if($id) {
-            $totalClassCount = $this->Sections->find('all',
-                ['conditions' => ['instructorid' => $id]])
-                ->select([
-                    'instructorid' => 'instructors.id',
-                    'total' => 'COUNT(*)'
-
-                ])
-                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-                ->group('instructors.id');
-
-        }
-        else{
-            //update all
-            $totalClassCount = $this->Sections->find()
-                ->select([
-                    'instructorid' => 'instructors.id',
-                    'total' => 'COUNT(*)'
-
-                ])
-                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-                ->group('instructors.id');
-
-
-        }
-
-        foreach($totalClassCount as $classcount)
-        {
-
-            $query =  $this->query();
-            $query->update()->set(['totalclasses' => $classcount->total])
-                ->where(['id'=>$classcount->instructorid])
-                ->execute();
-
-        }
-
-
-
-    }
-
-
+    //---------------------  functions to update all instructor Semester class counts on semester change -------------//
     public function InstructorSemesterClassCount($id=null)
     {
         if($id) {
@@ -146,6 +92,49 @@ class InstructorsTable extends Table
 
 
     }
+
+//    public function InstructorTotalClassCount($id=null)
+//    {
+//        if($id) {
+//            $totalClassCount = $this->Sections->find('all',
+//                ['conditions' => ['instructorid' => $id]])
+//                ->select([
+//                    'instructorid' => 'instructors.id',
+//                    'total' => 'COUNT(*)'
+//
+//                ])
+//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
+//                ->group('instructors.id');
+//
+//        }
+//        else{
+//            //update all
+//            $totalClassCount = $this->Sections->find()
+//                ->select([
+//                    'instructorid' => 'instructors.id',
+//                    'total' => 'COUNT(*)'
+//
+//                ])
+//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
+//                ->group('instructors.id');
+//
+//
+//        }
+//
+//        foreach($totalClassCount as $classcount)
+//        {
+//
+//            $query =  $this->query();
+//            $query->update()->set(['totalclasses' => $classcount->total])
+//                ->where(['id'=>$classcount->instructorid])
+//                ->execute();
+//
+//        }
+//
+//
+//
+//    }
+
 }
 
 

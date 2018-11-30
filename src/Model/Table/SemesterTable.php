@@ -38,6 +38,10 @@ class SemesterTable extends Table
         $this->hasMany('Sections', [
             'foreignKey' => 'instructorid'
         ]);
+
+        $this->hasMany('Sections', [
+            'foreignKey' => 'semesterid'
+        ]);
     }
 
     /**

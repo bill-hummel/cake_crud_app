@@ -38,12 +38,12 @@ class SectionsStudentsTable extends Table
 
         //students belong to many individual classes (sections_students) (belongsToMany)
         $this->belongsTo('Students', [
-            'foreignKey' => 'studentid'  //todo - do I need a targetForeignKey??
+            'foreignKey' => 'studentid'
         ]);
 
         //Sections belong to many individual classes (sections_students) (belongsToMany)
         $this->belongsTo('Sections', [
-            'foreignKey' => 'sectionid'   //todo - do I need a targetForeignKey??
+            'foreignKey' => 'sectionid'
         ]);
 
     }
@@ -114,7 +114,7 @@ class SectionsStudentsTable extends Table
 
         } else {
             //A grade was changed - update the student's gpa values for semeter and year
-            $this->computeStudentGpas($studentid , $sectionid );
+            $this->computeStudentGpas($studentid , $sectionid , $modeFlag);
 
         }
 
@@ -140,7 +140,7 @@ class SectionsStudentsTable extends Table
 
 
         //A grade was changed - update the student's gpa values for semeter and year
-        $this->computeStudentGpas($studentid , $sectionid );
+        $this->computeStudentGpas($studentid , $sectionid , 2);
 
 
 
@@ -149,22 +149,40 @@ class SectionsStudentsTable extends Table
     //----------------------- support methods for updating student credits and gpa values ----------------------//
 
     //compute student gpa for semester and year and write out
-    public function computeStudentGpas($studentid = null, $sectionid = null)
+    public function computeStudentGpas($studentid = null, $sectionid = null, $modeflag = 1)
     {
         //todo -> upgrade to use weighted averages
         //Update gpa values for year and semester
 
-        //get all courses and semester courses for this student
-        $currentStudentYearClasses = $this->find()
-            ->contain(['Sections' => ['Semester']])
-            ->where(['SectionsStudents.studentid' => $studentid])->all();
+        if($modeflag == 1) {
 
-        //count only courses for this semester
-        $currentStudentSemesterClasses = $this->find()
-            ->contain(['Sections' => ['Semester']])
-            ->where(['SectionsStudents.studentid' => $studentid, 'Semester.semestercurrent' => '1'])
-            ->all();
 
+            //get all courses and semester courses for this student
+            $currentStudentYearClasses = $this->find()
+                ->contain(['Sections' => ['Semester']])
+                ->where(['SectionsStudents.studentid' => $studentid])->all();
+
+            //count only courses for this semester
+            $currentStudentSemesterClasses = $this->find()
+                ->contain(['Sections' => ['Semester']])
+                ->where(['SectionsStudents.studentid' => $studentid, 'Semester.semestercurrent' => '1'])
+                ->all();
+        }
+        else {
+            //get all courses and semester courses for this student
+            $currentStudentYearClasses = $this->find()
+                ->contain(['Sections' => ['Semester']])
+                ->where(['SectionsStudents.studentid' => $studentid, 'SectionsStudents.sectionid !='=>$sectionid])->all();
+
+            //count only courses for this semester
+            $currentStudentSemesterClasses = $this->find()
+                ->contain(['Sections' => ['Semester']])
+                ->where(['SectionsStudents.studentid' => $studentid, 'Semester.semestercurrent' => '1', 'SectionsStudents.sectionid !='=>$sectionid])
+                ->all();
+
+
+
+        }
 
         //iterate over the sections and compute the gpa
         $rowCountYear = 0;
@@ -199,14 +217,10 @@ class SectionsStudentsTable extends Table
         }
 
 
-
-
-
-
         //write gpa changes to the students table for the student
 
         //get the current student
-        $thisStudent = $this->Students->find()->where(['id' => $studentid])->firstOrFail();
+        $thisStudent = $this->Students->find()->where(['id' => $studentid])->first();
 
         $currentStudent = $this->Students->patchEntity($thisStudent, ['semestergpa' => $semesterGpa, 'gpa'=>$yearGpa]);
 
@@ -218,16 +232,21 @@ class SectionsStudentsTable extends Table
 
     }
 
+
+
+
+
+
     //update student year and semester credits
     public function computeStudentCredits ($studentid = null, $sectionid = null, $modeFlag=1)
     {
         //get the value of a credit for this course
-        $thisSection = $this->sections->find()->where(['id' => $sectionid])->firstOrFail();
-        $thisClass = $this->sections->classes->find()->where(['id' => $thisSection->classid])->firstOrFail();
+        $thisSection = $this->sections->find()->where(['id' => $sectionid])->first();
+        $thisClass = $this->sections->classes->find()->where(['id' => $thisSection->classid])->first();
         $thisClassCreditValue = $thisClass->credits;
 
         //get the current student
-        $thisStudent = $this->Students->find()->where(['id' => $studentid])->firstOrFail();
+        $thisStudent = $this->Students->find()->where(['id' => $studentid])->first();
 
 
         if($modeFlag == 1) {

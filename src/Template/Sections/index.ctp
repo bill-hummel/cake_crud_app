@@ -37,8 +37,16 @@
                 <td><?= h($section->sectionid) ?></td>
                 <td><?= h($section->class->coursename) ?></td>
 
-                <td><?= $this->Html->link(__(h($section->instructor->firstname.' '.$section->instructor->lastname)),
-                    ['controller' => 'Instructors', 'action' => 'view', $section->instructor->id]) ?></td>
+
+                <td><?php if($section->instructorid == null){
+                             echo 'None';
+                          }
+                          else {
+                              echo $this->Html->link(__(h($section->instructor->firstname.' '.$section->instructor->lastname)),
+                                   ['controller' => 'Instructors', 'action' => 'view', $section->instructor->id]);
+                          };
+                    ?>
+                </td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['action' => 'view', $section->id]) ?>
                     <?= $this->Html->link(__('Edit'), ['action' => 'edit', $section->id]) ?>
