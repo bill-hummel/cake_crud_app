@@ -45,9 +45,4 @@ class Section extends Entity
     ];
 
 
-    //protected function _getSectionInfo()
-    //{
-    //    return $this->Course->get('first_name') . ' ' . $this->get('last_name');
-   // }
-
 }

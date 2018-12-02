@@ -67,17 +67,6 @@ class ClassesTable extends Table
     }
 
 
-    public function beforeSaveCommit()
-    {
-        // todo - update all student records affected by a credit change
-        //get all sections , all students, update credit value by subtracting old credit value (db) and adding the new
-        // (as submitted)
-
-
-
-
-
-    }
 
 
     public function beforeDelete($event,$class,$options)
@@ -138,6 +127,8 @@ class ClassesTable extends Table
 
             //-------------------------update students removed from sections associated with class ------------------//
             //get all student ids from sections before they are deleted from the join table
+
+
             $currentSectionStudents = $this->Sections->SectionsStudents->find()
                 ->where(['SectionsStudents.sectionid' => $currentSectionID])
                 ->all();
@@ -147,11 +138,13 @@ class ClassesTable extends Table
             foreach ($currentSectionStudents as $currentStudent) {
                 $currentStudentID = $currentStudent->studentid;
 
-                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, $modeFlag);
+                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $currentSectionID, 0);
+                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $currentSectionID, 1);
 
 
-                //A grade was changed - update the student's gpa values for semeter and year
-                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $sectionid, $modeflag);
+                //A grade was changed - update the student's gpa values for semester and year
+                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $currentSectionID, 0);
+                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $currentSectionID, 1);
 
 
             }

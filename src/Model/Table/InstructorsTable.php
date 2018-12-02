@@ -73,7 +73,7 @@ class InstructorsTable extends Table
             ])
                 ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
                 ->innerjoin('semester', 'Sections.semesterid = semester.semestercurrent')
-                ->where(['semester.semestercurrent' => '1'])
+                ->where(['semester.semestercurrent' => '0'])
                 ->group('instructors.id');
 
 
@@ -81,7 +81,7 @@ class InstructorsTable extends Table
         }
         foreach($semesterClassCount as $semclasscount)
         {
-
+            //dump($semclasscount->total, $semclasscount->instructorid);
             $query =  $this->query();
             $query->update()->set(['semesterclasses' => $semclasscount->total])
                 ->where(['id'=>$semclasscount->instructorid])
@@ -93,47 +93,6 @@ class InstructorsTable extends Table
 
     }
 
-//    public function InstructorTotalClassCount($id=null)
-//    {
-//        if($id) {
-//            $totalClassCount = $this->Sections->find('all',
-//                ['conditions' => ['instructorid' => $id]])
-//                ->select([
-//                    'instructorid' => 'instructors.id',
-//                    'total' => 'COUNT(*)'
-//
-//                ])
-//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-//                ->group('instructors.id');
-//
-//        }
-//        else{
-//            //update all
-//            $totalClassCount = $this->Sections->find()
-//                ->select([
-//                    'instructorid' => 'instructors.id',
-//                    'total' => 'COUNT(*)'
-//
-//                ])
-//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-//                ->group('instructors.id');
-//
-//
-//        }
-//
-//        foreach($totalClassCount as $classcount)
-//        {
-//
-//            $query =  $this->query();
-//            $query->update()->set(['totalclasses' => $classcount->total])
-//                ->where(['id'=>$classcount->instructorid])
-//                ->execute();
-//
-//        }
-//
-//
-//
-//    }
 
 }
 

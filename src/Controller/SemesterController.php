@@ -35,23 +35,43 @@ class SemesterController extends AppController
      */
     public function edit()
     {   //todo - fix to toggle semester
+
+
         $currentSemester = $this->Semester->find()->where(['semestercurrent' => '1'])->first();
 
-        $semester = $this->Semester->get($currentSemester->id, [
-            'contain' => []
-        ]);
+        $semester = $this->Semester->get($currentSemester->id, ['contain' => [] ]);
+
+
         if ($this->request->is(['patch', 'post', 'put'])) {
-            $semester = $this->Semester->patchEntity($semester, $this->request->getData());
 
-            //change current semester value to indicate inactive (0)
+            $semesters = $this->Semester->find()->all();
 
-//            if ($this->Semester->save($semester)) {
-//                $this->Flash->success(__('The semester has been saved.'));
-//
-//                return $this->redirect(['action' => 'index']);
-//            }
-//            $this->Flash->error(__('The semester could not be saved. Please, try again.'));
-        }
+            //get the current semester change value from $request:
+            $semesterChangeValue = (int)$this->request->getData('semestercurrent');
+
+            if($semesterChangeValue === $semester->semestercurrent){
+                return $this->redirect(['action' => 'index']);
+
+            }
+            else {
+                foreach($semesters as $semester)
+                {
+                    if($semester->semestercurrent == 0)
+                         $semester = $this->Semester->patchEntity($semester, ['semestercurrent'=>'1']);
+                    else
+                         $semester = $this->Semester->patchEntity($semester, ['semestercurrent'=>'0']);
+
+                    $this->Semester->save($semester);
+
+
+                }
+
+                $this->Flash->success(__('The semester has been saved.'));
+
+                return $this->redirect(['action' => 'index']);
+
+            }
+       }
         $this->set(compact('semester'));
     }
 

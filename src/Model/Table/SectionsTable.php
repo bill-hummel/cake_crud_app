@@ -253,7 +253,7 @@ class SectionsTable extends Table
         //get the data commited to the sections_students table
 
         $sectionid = $section->id;
-        $modeFlag = 2;   //modeflag = 1 ---> ad a course,   modeFlag = 2 ---> delete a course
+
 
         //get all student ids from sections before they are deleted from the join table
         $currentSectionStudents = $this->SectionsStudents->find()
@@ -265,11 +265,14 @@ class SectionsTable extends Table
         foreach ($currentSectionStudents as $currentStudent) {
             $currentStudentID = $currentStudent->studentid;
 
-            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, $modeFlag);
+            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, 0);
+            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, 1);
 
 
             //A grade was changed - update the student's gpa values for semester and year
-            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, $modeFlag );
+            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, 0 );
+            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, 1 );
+
 
 
         }
