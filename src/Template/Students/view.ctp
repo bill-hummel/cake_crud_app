@@ -57,12 +57,13 @@
                 <th scope="col"><?= __('Section') ?></th>
                 <th scope="col"><?= __('Course name') ?></th>
                 <th scope="col"><?= __('Instructor') ?></th>
+                <th scope="col"><?= __('Letter Grade') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
             </tr>
             <?php foreach ($student->sections as $section): ?>
             <tr>
                 <td><?= h($section->year) ?></td>
-                <td><?= h($section->semester->semestername) ?></td>
+                <td><?= h($section->semester->semesterabr) ?></td>
                 <td><?= h($section->meetingdays) ?></td>
                 <td><?= h($section->starttime.' - '.$section->endtime) ?></td>
                 <td><?= h($section->sectionid) ?></td>
@@ -75,6 +76,7 @@
                           }
 
                     ?></td>
+                <td><?= h($section->_joinData->lettergrade) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['controller' => 'SectionsStudents', 'action' => 'view', $section->_joinData->id]) ?>
                     <?= $this->Html->link(__('Edit Grade'), ['controller' => 'SectionsStudents', 'action' => 'edit', $section->_joinData->id]) ?>
