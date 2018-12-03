@@ -147,7 +147,7 @@ class SectionsStudentsController extends AppController
         if ($this->request->is(['patch', 'post', 'put'])) {
             $sectionsStudent = $this->SectionsStudents->patchEntity($sectionsStudent, $this->request->getData());
 
-            //convert the letter gade to a numeric value before saving the data - use convert_grade in the Table class!:the
+            //convert the letter grade to a numeric value before saving the data - use convert_grade in the Table class!:the
             $sectionsStudent->numericgrade = $this->SectionsStudents->convert_grade($sectionsStudent->lettergrade);
 
             if ($this->SectionsStudents->save($sectionsStudent)) {
