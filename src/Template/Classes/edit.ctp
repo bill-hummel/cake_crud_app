@@ -3,7 +3,7 @@
     <ul class="side-nav">
         <li class="heading"><?= __('Actions') ?></li>
         <li><?= $this->Html->link(__('List Courses'), ['controller' => 'Classes', 'action' => 'index']) ?></li>
-        <li><?= $this->Html->link(__('New Course'), ['controller' => 'Students', 'action' => 'add']) ?></li>    </ul>
+        <li><?= $this->Html->link(__('New Course'), ['controller' => 'Classes', 'action' => 'add']) ?></li>    </ul>
 </nav>
 <div class="sections form large-9 medium-8 columns content">
 <h1>Update Course Information</h1>

@@ -103,7 +103,7 @@ class SectionsStudentsTable extends Table
         $studentid = $sectionsstudent->studentid;
         $sectionid = $sectionsstudent->sectionid;
         $letterGradeFlag = $sectionsstudent->lettergrade; //was a letter grade or a course add submitted?
-        $modeFlag = 1;   //modeflag = 1 ---> ad a course,   modeFlag = 0 ---> delete a course
+        $modeFlag = 1;   //modeflag = 1 ---> add a course,   modeFlag = 0 ---> delete a course
 
 
         //Check that this afterSaveCommit is not being called on a grade change, but on a course add for the student!
@@ -120,10 +120,6 @@ class SectionsStudentsTable extends Table
 
 
 
-        //$this->updateSingleStudentYearGPA($id);
-        //$this->updateSingleStudentSemesterGPA($id);
-
-
     }
 
     public function afterDeleteCommit($event, $sectionsstudent, $options)
@@ -133,14 +129,14 @@ class SectionsStudentsTable extends Table
         //get the data commited to the sections_students table
         $studentid = $sectionsstudent->studentid;
         $sectionid = $sectionsstudent->sectionid;
-        $modeFlag = 2;   //modeflag = 1 ---> ad a course,   modeFlag = 0 ---> delete a course
+        $modeFlag = 0;   //modeflag = 1 ---> add a course,   modeFlag = 0 ---> delete a course
 
         //update the
         $this->computeStudentCredits ($studentid, $sectionid, $modeFlag);
 
 
         //A grade was changed - update the student's gpa values for semeter and year
-        $this->computeStudentGpas($studentid , $sectionid , 2);
+        $this->computeStudentGpas($studentid , $sectionid , $modeFlag);
 
 
 
@@ -155,7 +151,7 @@ class SectionsStudentsTable extends Table
         //Update gpa values for year and semester
 
         if($modeflag == 1) {
-
+            ////Compute the GPAs if a course is being added or the semester is changing
 
             //get all courses and semester courses for this student
             $currentStudentYearClasses = $this->find()
@@ -169,6 +165,8 @@ class SectionsStudentsTable extends Table
                 ->all();
         }
         else {
+            //Compute the GPAs if a course is being removed
+
             //get all courses and semester courses for this student
             $currentStudentYearClasses = $this->find()
                 ->contain(['Sections' => ['Semester']])
@@ -253,7 +251,7 @@ class SectionsStudentsTable extends Table
             //add this value to the current student's total credits and current semester credits
             $currentStudent = $this->Students->patchEntity($thisStudent, ['totalcredits' => $creditYearTotal]);
 
-            //optionally update the semester totals
+            //update the semester totals
             if ($this->sections->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
                 $creditSemesterTotal = $thisStudent->semestercredits + $thisClassCreditValue;
 
@@ -281,7 +279,7 @@ class SectionsStudentsTable extends Table
             //subtract this value from the current student's total credits and current semester credits
             $currentStudent = $this->Students->patchEntity($thisStudent, ['totalcredits' => $creditYearTotal]);
 
-            //optionally update the semester total by deleting value of removed course's credits
+            //update the semester total by deleting value of removed course's credits
             if ($this->sections->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
                 $creditSemesterTotal = $thisStudent->semestercredits - $thisClassCreditValue;
 

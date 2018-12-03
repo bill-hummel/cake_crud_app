@@ -138,14 +138,13 @@ class ClassesTable extends Table
             foreach ($currentSectionStudents as $currentStudent) {
                 $currentStudentID = $currentStudent->studentid;
 
-                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $currentSectionID, 0);
-                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $currentSectionID, 1);
+                $modeFlag = 0;
+
+                $this->Sections->SectionsStudents->computeStudentCredits($currentStudentID, $currentSectionID, $modeFlag);
 
 
                 //A grade was changed - update the student's gpa values for semester and year
-                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $currentSectionID, 0);
-                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $currentSectionID, 1);
-
+                $this->Sections->SectionsStudents->computeStudentGpas($currentStudentID, $currentSectionID, $modeFlag);
 
             }
         }

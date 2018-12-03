@@ -12,6 +12,7 @@
         <li><?= $this->Html->link(__('List Courses'), ['controller' => 'Classes', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('List Sections'), ['controller' => 'Sections', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('Add a Student to a Class'), ['controller' => 'SectionsStudents', 'action' => 'add']) ?></li>
+        <li><?= $this->Html->link(__('View/Edit Semester Information'), ['controller' => 'Semester', 'action' => 'index']) ?></li>
         <li><?= $this->Html->link(__('Logout'), ['controller' => 'Users', 'action' => 'logout']) ?></li>
 
     </ul>

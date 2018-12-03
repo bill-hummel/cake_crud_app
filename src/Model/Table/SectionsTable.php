@@ -150,7 +150,7 @@ class SectionsTable extends Table
                 //update instructors table for the year and semester
                 $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses' => $thisInstructorYearTotal]);
 
-                //optionally update the semester totals
+                //update the semester totals
                 if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionID, 'Semester.semestercurrent' => '1'])->first()) {
                     $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
 
@@ -265,13 +265,15 @@ class SectionsTable extends Table
         foreach ($currentSectionStudents as $currentStudent) {
             $currentStudentID = $currentStudent->studentid;
 
-            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, 0);
-            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, 1);
+            $modeFlag = 0;
+
+            $this->SectionsStudents->computeStudentCredits($currentStudentID, $sectionid, $modeFlag);
+
 
 
             //A grade was changed - update the student's gpa values for semester and year
-            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, 0 );
-            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, 1 );
+            $this->SectionsStudents->computeStudentGpas($currentStudentID , $sectionid, $modeFlag );
+
 
 
 
