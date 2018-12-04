@@ -132,10 +132,12 @@ class SectionsTable extends Table
     {
         //todo - incremental changes to instructors and former instructors
         //check for instructor change... update instructor class totals for original instructor IF NOT NULL
-        $sectionID = $section->id;
-        $newInstructorID = $section->instructorid;
+        $sectionID = $section->id;  //todo - remove
+        $newInstructorID = $section->instructorid; //todo - remove
 
         //get the original instructor's information from the database before updating
+
+        //todo - use getOriginal method
 
         if($sectionBeforeUpdate = $this->find()->where(['Sections.id' => $sectionID])->first()) {
             //check to be sure that the instructor was not deleted and made null
@@ -162,6 +164,7 @@ class SectionsTable extends Table
                 //save to the instructors table
                 if (!($this->Instructors->save($oldInstructor))) {
 
+                    //todo - remove and replace with a try{} - catch the exception in the controller and then display the flash message
                     $this->Flash->error(__('Unable to update instructor course totals information.'));
 
                 }
@@ -173,15 +176,14 @@ class SectionsTable extends Table
 
     public function afterSaveCommit($event,$section,$options)
     {
-
-        //if instructor changes then change course information for prior instructor in beforeSave, new instructor here
-        // as an add
-
+        //if instructor changes then change course information for prior instructor in beforeSave, new instructor here as an add
 
         //--------------------------------- Update the Instructor Course Totals for the selected Instructor ----------------//
         //Get the id of the current instructor
-        $id = $section->instructorid;
-        $sectionid = $section->id;
+        $id = $section->instructorid;  //todo -- remove
+        $sectionid = $section->id;  //todo -- remove
+
+        //dump($section->getOriginal('instructorid'),$id);
 
         //update the number of courses for semester and year for current instructor
 
@@ -210,15 +212,24 @@ class SectionsTable extends Table
 
     }
 
+    //ammended afterSaveCommit function
+    public function afterSHaveCommit()
+    {
+        //Get instructor id before change to new instructor - use nearly undocumented Cake entity method ...
+        //$oldInstructor = $section->getOriginal('instructorid');
 
+    }
 
 
     public function beforeDelete($event,$section,$options)
     {
         //update Instructor course totals
+
+
         //Get the id of the current instructor
         $id = $section->instructorid;
         $sectionid = $section->id;
+
 
         //update the number of courses for semester and year for current instructor
 

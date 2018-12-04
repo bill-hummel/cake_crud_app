@@ -9,12 +9,12 @@ use App\Controller\AppController;
 
 class ClassesController extends AppController
 {
-    public function initialize()  //boilerplate code to initialize the class
+    public function initialize()
     {
-        parent::initialize();   //call AppController initialize first
+        parent::initialize();
 
         $this->loadComponent('Paginator');
-        $this->loadComponent('Flash'); // Include the FlashComponent
+        $this->loadComponent('Flash');
 
         $this->loadModel('Classes');
         $this->loadModel('Sections');
@@ -58,8 +58,6 @@ class ClassesController extends AppController
         if ($this->request->is('post')) //verify that this is a post and not something else
         {
             $class = $this->Classes->patchEntity($class, $this->request->getData());
-
-
 
             if ($this->Classes->save($class)) {
                 $this->Flash->success(__('The class information has been added.'));
