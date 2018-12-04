@@ -25,16 +25,16 @@
     <p><?= h($student->major) ?></p>
 </td>
 <td>
-    <p><?= h($student->semestercredits) ?></p>
+    <p><?= $this->Number->format(($student->semestercredits),['places'=>1]) ?></p>
 </td>
 <td>
-    <p><?= h($student->totalcredits) ?></p>
+    <p><?= $this->Number->format(($student->totalcredits),['places'=>1]) ?></p>
 </td>
 <td>
-    <p><?= h($student->semestergpa) ?></p>
+    <p><?= $this->Number->format(($student->semestergpa),['places'=>2]) ?></p>
 </td>
 <td>
-    <p><?= h($student->gpa) ?></p>
+    <p><?= $this->Number->format(($student->gpa),['places'=>2]) ?></p>
 </td>
 <td>
     <?= $this->Html->link('<List>', ['action' => 'index', $student->studentnumber]) ?>
@@ -57,6 +57,7 @@
                 <th scope="col"><?= __('Section') ?></th>
                 <th scope="col"><?= __('Course name') ?></th>
                 <th scope="col"><?= __('Instructor') ?></th>
+                <th scope="col"><?= __('Credits') ?></th>
                 <th scope="col"><?= __('Letter Grade') ?></th>
                 <th scope="col" class="actions"><?= __('Actions') ?></th>
             </tr>
@@ -76,6 +77,8 @@
                           }
 
                     ?></td>
+
+                <td><?= $this->Number->format(($section->class->credits),['places'=>1]) ?></td>
                 <td><?= h($section->_joinData->lettergrade) ?></td>
                 <td class="actions">
                     <?= $this->Html->link(__('View'), ['controller' => 'SectionsStudents', 'action' => 'view', $section->_joinData->id]) ?>
