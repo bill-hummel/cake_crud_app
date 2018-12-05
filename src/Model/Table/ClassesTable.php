@@ -16,7 +16,7 @@ class ClassesTable extends Table
         parent::initialize($config);
 
         $this->setTable('classes');
-        //$this->setEntityClass('App\Model\Entity\Course'); \\todo - fix this so that full class name is presented
+        //$this->setEntityClass('Course'); \\todo - fix this so that full class name is presented
         //$this->setDisplayField('full_class_name');
         $this->setDisplayField('coursename');
         $this->setPrimaryKey('id');
