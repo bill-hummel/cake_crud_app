@@ -43,8 +43,17 @@
             <td><?= $this->Number->format($section->totalstudents) ?></td>
         </tr>
         <tr>
-            <th scope="row"><?= __('Instructorid') ?></th>
-            <td><?= $section->instructor->firstname." ".$section->instructor->lastname ?></td>
+            <th scope="row"><?= __('Instructor') ?></th>
+
+            <td><?php if($section->instructorid == null){
+                echo 'None';
+                }
+                else {
+                echo $this->Html->link(__(h($section->instructor->firstname.' '.$section->instructor->lastname)),
+                ['controller' => 'Instructors', 'action' => 'view', $section->instructor->id]);
+                };
+                ?>
+            </td>
         </tr>
     </table>
     <div class="related">

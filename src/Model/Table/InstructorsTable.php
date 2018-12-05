@@ -25,7 +25,6 @@ class InstructorsTable extends Table
         ]);
 
 
-
     }
 
     //validation
@@ -33,67 +32,66 @@ class InstructorsTable extends Table
     {
 
         $validator
-            ->requirePresence('firstname','create')
+            ->requirePresence('firstname', 'create')
             ->notEmpty('firstname')
-
-            ->requirePresence('lastname','create')
+            ->requirePresence('lastname', 'create')
             ->notEmpty('lastname')
-            ->requirePresence('department','create')
+            ->requirePresence('department', 'create')
             ->notEmpty('department');
 
         return $validator;
     }
 
 
-
-    //---------------------  functions to update all instructor Semester class counts on semester change -------------//
-    public function InstructorSemesterClassCount($id=null)
-    {
-        if($id) {
-            $semesterClassCount = $this->Sections->find('all',
-                ['conditions' => ['instructorid' => $id]])
-            ->select([
-                'instructorid' => 'instructors.id',
-                'total' => 'COUNT(*)'
-
-            ])
-                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-                ->innerjoin('semester', 'Sections.semesterid = semester.semestercurrent')
-                ->where(['semester.semestercurrent' => '1'])
-                ->group('instructors.id');
-
-        }
-        else{
-            //update all
-            $semesterClassCount = $this->Sections->find()
-            ->select([
-                'instructorid' => 'instructors.id',
-                'total' => 'COUNT(*)'
-
-            ])
-                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
-                ->innerjoin('semester', 'Sections.semesterid = semester.semestercurrent')
-                ->where(['semester.semestercurrent' => '0'])
-                ->group('instructors.id');
-
-
-
-        }
-        foreach($semesterClassCount as $semclasscount)
-        {
-            //dump($semclasscount->total, $semclasscount->instructorid);
-            $query =  $this->query();
-            $query->update()->set(['semesterclasses' => $semclasscount->total])
-                ->where(['id'=>$semclasscount->instructorid])
-                ->execute();
-
-        }
-
-
-
-    }
-
-
 }
-
-
+    //---------------------  functions to update all instructor Semester class counts on semester change -------------//
+//    public function InstructorSemesterClassCount($id=null)
+//    {
+//        if($id) {
+//            $semesterClassCount = $this->Sections->find('all',
+//                ['conditions' => ['instructorid' => $id]])
+//            ->select([
+//                'instructorid' => 'instructors.id',
+//                'total' => 'COUNT(*)'
+//
+//            ])
+//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
+//                ->innerjoin('semester', 'Sections.semesterid = semester.semestercurrent')
+//                ->where(['semester.semestercurrent' => '1'])
+//                ->group('instructors.id');
+//
+//        }
+//        else{
+//            //update all
+//            $semesterClassCount = $this->Sections->find()
+//            ->select([
+//                'instructorid' => 'instructors.id',
+//                'total' => 'COUNT(*)'
+//
+//            ])
+//                ->innerjoin('instructors', 'instructors.id = Sections.instructorid')
+//                ->innerjoin('semester', 'Sections.semesterid = semester.semestercurrent')
+//                ->where(['semester.semestercurrent' => '0'])
+//                ->group('instructors.id');
+//
+//
+//
+//        }
+//        foreach($semesterClassCount as $semclasscount)
+//        {
+//            //dump($semclasscount->total, $semclasscount->instructorid);
+//            $query =  $this->query();
+//            $query->update()->set(['semesterclasses' => $semclasscount->total])
+//                ->where(['id'=>$semclasscount->instructorid])
+//                ->execute();
+//
+//        }
+//
+//
+//
+//    }
+//
+//
+//}
+//
+//

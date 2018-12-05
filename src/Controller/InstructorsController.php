@@ -108,14 +108,12 @@ class InstructorsController extends AppController
             {
                 $sectionInstructorNull =$this->Sections->patchEntity( $instructorSection, ['instructorid'=>null]);
 
-                //todo - save is still not working
+
                 if (!($this->Sections->save($sectionInstructorNull))) {
 
                     $this->Flash->error(__('Unable to update instructor information.'));
 
                 }
-
-
 
             }
 

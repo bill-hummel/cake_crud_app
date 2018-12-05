@@ -128,95 +128,176 @@ class SectionsTable extends Table
         return $rules;
     }
 
-    public function beforeSave($event,$section,$options)
+//    public function beforeSHave($event,$section,$options)
+//    {
+//        //todo - incremental changes to instructors and former instructors
+//        //check for instructor change... update instructor class totals for original instructor IF NOT NULL
+//        $sectionID = $section->id;  //todo - remove
+//        $newInstructorID = $section->instructorid; //todo - remove
+//
+//        //get the original instructor's information from the database before updating
+//
+//        //todo - use getOriginal method
+//
+//        if($sectionBeforeUpdate = $this->find()->where(['Sections.id' => $sectionID])->first()) {
+//            //check to be sure that the instructor was not deleted and made null
+//            if ($this->Instructors->find()->where(['id' => $sectionBeforeUpdate->instructorid])->first()) {
+//
+//
+//
+//                if ($sectionBeforeUpdate->instructorid != null && $newInstructorID != $sectionBeforeUpdate->instructorid) {
+//
+//                    //decrement classes count
+//                    $thisInstructor = $this->Instructors->get($sectionBeforeUpdate->instructorid);
+//
+//                    $thisInstructorYearTotal = $thisInstructor->totalclasses - 1;
+//
+//
+//                    //update instructors table for the year and semester
+//                    $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses' => $thisInstructorYearTotal]);
+//
+//                    //update the semester totals
+//                    if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionID, 'Semester.semestercurrent' => '1'])->first()) {
+//                        $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
+//
+//                        //add this value to the current student's total credits and current semester credits
+//                        $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+//
+//                    }
+//
+//                    //save to the instructors table
+//                    if (!($this->Instructors->save($oldInstructor))) {
+//
+//                        //todo - remove and replace with a try{} - catch the exception in the controller and then display the flash message
+//                        $this->Flash->error(__('Unable to update instructor course totals information.'));
+//
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
+//
+//
+//    public function afterSHaveCommit($event,$section,$options)
+//    {
+//
+//
+//        //if instructor changes then change course information for prior instructor in beforeSave, new instructor here as an add
+//
+//        //--------------------------------- Update the Instructor Course Totals for the selected Instructor ----------------//
+//        //Get the id of the current instructor
+//        $id = $section->instructorid;  //todo -- remove
+//        $sectionid = $section->id;  //todo -- remove
+//
+//        //check if instructor was deleted first!
+//        if ($this->Instructors->find()->where(['id' => $id])->first()) {
+//
+//            //update the number of courses for semester and year for current instructor
+//
+//            $thisInstructor = $this->Instructors->get($id);
+//
+//            $thisInstructorYearTotal = $thisInstructor->totalclasses + 1;
+//
+//            //update instructors table for the year and semester
+//            $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses' => $thisInstructorYearTotal]);
+//
+//            //optionally update the semester totals
+//            if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
+//                $thisInstructorSemesterTotal = $thisInstructor->semesterclasses + 1;
+//
+//                //add this value to the current student's total credits and current semester credits
+//                $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+//
+//            }
+//
+//            //save to the instructors table
+//            if (!($this->Instructors->save($currentInstructor))) {
+//
+//                $this->Flash->error(__('Unable to update instructor course totals information.'));
+//
+//            }
+//        }
+//    }
+
+    //ammended afterSaveCommit function
+    public function afterSaveCommit($event,$section,$options)
     {
-        //todo - incremental changes to instructors and former instructors
-        //check for instructor change... update instructor class totals for original instructor IF NOT NULL
-        $sectionID = $section->id;  //todo - remove
-        $newInstructorID = $section->instructorid; //todo - remove
+        //Get instructor id before change to new instructor - see Cake API documentation
+        $oldInstructorID = $section->getOriginal('instructorid');
+        /*
+         * Note: getOriginal() will return the id of the instructor that was last assigned, even if you
+         * deleted that instructor and then try to update instructor totals. You still need to check the
+         * db table to be sure that the instructor is deleted before attempting to update that record and
+         * thus generating a record not found error.
+         */
 
-        //get the original instructor's information from the database before updating
+        //get current / new instructor and section id(s)
+        $newInstructorID = $section->instructorid;  //todo -- remove and insert directly on refactor
+        $sectionID = $section->id;  //todo -- remove and insert directly on refactor
 
-        //todo - use getOriginal method
 
-        if($sectionBeforeUpdate = $this->find()->where(['Sections.id' => $sectionID])->first()) {
-            //check to be sure that the instructor was not deleted and made null
-            if ($sectionBeforeUpdate->instructorid != null && $newInstructorID != $sectionBeforeUpdate->instructorid) {
+        //if the instructor was NOT deleted then this commit was issued from the edit method or the add method (sections)
+        if($newInstructorID ) {
 
+            //instructor was just deleted, was added, or was updated from non null id
+            //Update new instructor -- increment new (+1)
+            $newInstructor = $this->Instructors->get($newInstructorID);
+
+            $newInstructorYearTotal = $newInstructor->totalclasses + 1;
+
+            //update instructors table for the year and semester
+            $currentInstructor = $this->Instructors->patchEntity($newInstructor, ['totalclasses' => $newInstructorYearTotal]);
+
+            //optionally update the semester totals
+            if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionID, 'Semester.semestercurrent' => '1'])->first()) {
+                $newInstructorSemesterTotal = $newInstructor->semesterclasses + 1;
+
+                //add this value to the current student's total credits and current semester credits
+                $currentInstructor = $this->Instructors->patchEntity($newInstructor, ['semesterclasses' => $newInstructorSemesterTotal]);
+
+            }
+
+            //save to the instructors table
+            if (!($this->Instructors->save($currentInstructor))) {
+
+                //todo - remove and replace with a try{} - catch the exception in the controller and then display the flash message
+                //$this->Flash->error(__('Unable to update instructor course totals information.'));
+
+            }
+
+            //decrement old instructor account only if a change of instructor has occurred
+            if($oldInstructorID != null && $newInstructorID != $oldInstructorID) {
+
+                //instructor was updated -- decrement old instructor (-1) and increment new (+1)
                 //decrement classes count
-                $thisInstructor = $this->Instructors->get($sectionBeforeUpdate->instructorid);
+                $oldInstructor = $this->Instructors->get($oldInstructorID);
 
-                $thisInstructorYearTotal = $thisInstructor->totalclasses - 1;
+                $oldInstructorYearTotal = $oldInstructor->totalclasses - 1;
 
 
                 //update instructors table for the year and semester
-                $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses' => $thisInstructorYearTotal]);
+                $oldInstructordata = $this->Instructors->patchEntity($oldInstructor, ['totalclasses' => $oldInstructorYearTotal]);
 
                 //update the semester totals
                 if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionID, 'Semester.semestercurrent' => '1'])->first()) {
-                    $thisInstructorSemesterTotal = $thisInstructor->semesterclasses - 1;
+                    $oldInstructorSemesterTotal = $oldInstructor->semesterclasses - 1;
 
                     //add this value to the current student's total credits and current semester credits
-                    $oldInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
+                    $oldInstructordata = $this->Instructors->patchEntity($oldInstructor, ['semesterclasses' => $oldInstructorSemesterTotal]);
 
                 }
 
-                //save to the instructors table
-                if (!($this->Instructors->save($oldInstructor))) {
+                if (!($this->Instructors->save($oldInstructordata))) {
 
                     //todo - remove and replace with a try{} - catch the exception in the controller and then display the flash message
-                    $this->Flash->error(__('Unable to update instructor course totals information.'));
+                    //$this->Flash->error(__('Unable to update instructor course totals information.'));
 
                 }
             }
-        }
-
-    }
-
-
-    public function afterSaveCommit($event,$section,$options)
-    {
-        //if instructor changes then change course information for prior instructor in beforeSave, new instructor here as an add
-
-        //--------------------------------- Update the Instructor Course Totals for the selected Instructor ----------------//
-        //Get the id of the current instructor
-        $id = $section->instructorid;  //todo -- remove
-        $sectionid = $section->id;  //todo -- remove
-
-        //dump($section->getOriginal('instructorid'),$id);
-
-        //update the number of courses for semester and year for current instructor
-
-        $thisInstructor = $this->Instructors->get($id);
-
-        $thisInstructorYearTotal = $thisInstructor->totalclasses + 1;
-
-        //update instructors table for the year and semester
-        $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['totalclasses'=>$thisInstructorYearTotal]);
-
-        //optionally update the semester totals
-        if ($this->find()->contain(['Semester'])->where(['Sections.id' => $sectionid, 'Semester.semestercurrent' => '1'])->first()) {
-            $thisInstructorSemesterTotal = $thisInstructor->semesterclasses + 1;
-
-            //add this value to the current student's total credits and current semester credits
-            $currentInstructor = $this->Instructors->patchEntity($thisInstructor, ['semesterclasses' => $thisInstructorSemesterTotal]);
 
         }
-
-        //save to the instructors table
-        if (!($this->Instructors->save($currentInstructor))) {
-
-            $this->Flash->error(__('Unable to update instructor course totals information.'));
-
-        }
-
-    }
-
-    //ammended afterSaveCommit function
-    public function afterSHaveCommit()
-    {
-        //Get instructor id before change to new instructor - use nearly undocumented Cake entity method ...
-        //$oldInstructor = $section->getOriginal('instructorid');
+        //old was not null but new was null - nothing to do
 
     }
 
